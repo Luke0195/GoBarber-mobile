@@ -1,6 +1,8 @@
-import React from 'react';
-import {Image, KeyboardAvoidingView, Platform, ScrollView} from 'react-native'
-import {useNavigation} from '@react-navigation/native'
+import React, { useCallback, useRef} from 'react';
+import {Image, KeyboardAvoidingView, Platform, ScrollView, View, TextInput} from 'react-native'
+import {useNavigation} from '@react-navigation/native';
+import {Form} from '@unform/mobile'
+import {FormHandles} from '@unform/core';
 import Icons from 'react-native-vector-icons/Feather'
 import Input from '../../components/Input';
 import Button from '../../components/Button'
@@ -9,6 +11,15 @@ import logoImg from '../../assets/logo.png';
 
 const SignIn:React.FC  = () =>{
   const navigation = useNavigation();
+  const formRef = useRef<FormHandles>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+
+
+
+const handleSignIn = useCallback(() =>{
+    console.log('Chamando a função singIn')
+},[])
+
   return(
     <>
       <KeyboardAvoidingView
@@ -25,9 +36,35 @@ const SignIn:React.FC  = () =>{
           <Container>
             <Image source={logoImg} />
             <Title> Faça seu logon</Title>
-            <Input name="email" icon="mail" placeholder="E-mail" placeholderTextColor="#666360" />
-            <Input name="password" icon="lock" placeholder="Senha" placeholderTextColor="#666360" />
-            <Button onPress={() =>{console.log('Deu')}}> Entrar </Button>
+            <Form onSubmit={handleSignIn} ref={formRef}>
+              <Input
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                name="email"
+                icon="mail"
+                placeholder="E-mail"
+                placeholderTextColor="#666360"
+                returnKeyType="next"
+                onSubmitEditing={() =>{
+                  passwordInputRef.current?.focus()
+                }}
+
+              />
+              <Input
+                ref={passwordInputRef}
+                name="password"
+                secureTextEntry
+                icon="lock"
+                placeholder="Senha"
+                placeholderTextColor="#666360"
+                returnKeyType="send"
+                onSubmitEditing={() =>{ formRef.current?.submitForm()}}
+              />
+              <View>
+                <Button onPress={() =>{ formRef.current?.submitForm()}}> Entrar </Button>
+              </View>
+            </Form>
             <ForgotPassword onPress={() =>{ console.log('Deu certo')}}>
               <ForgotPasswordText> Esqueci minha senha</ForgotPasswordText>
             </ForgotPassword>
