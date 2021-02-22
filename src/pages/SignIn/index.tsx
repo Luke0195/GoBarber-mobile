@@ -1,13 +1,23 @@
 import React, { useCallback, useRef} from 'react';
-import {Image, KeyboardAvoidingView, Platform, ScrollView, View, TextInput} from 'react-native'
+import {Image, KeyboardAvoidingView, Platform, ScrollView, View, TextInput, Alert} from 'react-native'
 import {useNavigation} from '@react-navigation/native';
 import {Form} from '@unform/mobile'
 import {FormHandles} from '@unform/core';
 import Icons from 'react-native-vector-icons/Feather'
+import * as Yup from 'yup'
+
 import Input from '../../components/Input';
 import Button from '../../components/Button'
 import {Container,Title,ForgotPassword,ForgotPasswordText,CreateAccountButton,CreateAccountButtonText} from './styles';
 import logoImg from '../../assets/logo.png';
+import getValidationErrors from '../../utils/getValidation';
+
+
+
+interface SignInFormData{
+  email:string;
+  password: string;
+}
 
 const SignIn:React.FC  = () =>{
   const navigation = useNavigation();
@@ -16,9 +26,43 @@ const SignIn:React.FC  = () =>{
 
 
 
-const handleSignIn = useCallback(() =>{
-    console.log('Chamando a função singIn')
-},[])
+  const handleSignIn = useCallback(
+    async (data: SignInFormData) => {
+      try {
+        formRef.current?.setErrors({});
+        const schema = Yup.object().shape({
+          email: Yup.string()
+            .required('Email obrigatório')
+            .email('Informe um email válido'),
+          password: Yup.string().required('Senha obrigatória'),
+        });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+      /*
+        await signIn({
+          email: data.email,
+          password: data.password,
+        });
+
+        addToast({
+          type: 'sucess',
+          title: 'Autenticado com Sucesso',
+          description: 'Seja bem-vindo ao GoBarber',
+        });
+        */
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(error);
+          formRef.current?.setErrors(errors);
+        }
+        console.log(error);
+        Alert.alert('Erro na autenticação', 'Ocorreu um erro ao fazer login, verique as credencials');
+
+      }
+    },
+    [],
+  );
 
   return(
     <>
